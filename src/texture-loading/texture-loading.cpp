@@ -1,5 +1,6 @@
 #include <iostream>
-#include <string>
+#include <mach-o/dyld.h>
+#include <libgen.h>
 
 #include <SDL2/SDL.h>
 
@@ -56,22 +57,39 @@ bool init() {
     return success_code;
 }
 
+std::string get_resource_path() {
+    char path[1024];
+    uint32_t size = sizeof(path);
+    if (_NSGetExecutablePath(path, &size) == 0) {
+        char* dir = dirname(path);
+        std::string resourceDir = std::string(dir) + "/../Resources/";
+        return resourceDir;
+    }
+    return"";
+}
+
 bool load_media() {
     bool success = true;
 
-    key_press_texture_a[KEY_DEFAULT_TEXTURE] = load_texture("../res/img/def.bmp");
+    std::string resource_path = get_resource_path();
+    if (resource_path.empty()) {
+        std::cout << "Could not determine resource path." << std::endl;
+        return false;
+    }
+
+    key_press_texture_a[KEY_DEFAULT_TEXTURE] = load_texture((resource_path + "img/def.bmp").c_str());
     if (key_press_texture_a[KEY_DEFAULT_TEXTURE] == nullptr) { success = false; }
 
-    key_press_texture_a[KEY_UP_TEXTURE] = load_texture("../res/img/up.bmp");
+    key_press_texture_a[KEY_UP_TEXTURE] = load_texture((resource_path + "img/up.bmp").c_str());
     if (key_press_texture_a[KEY_UP_TEXTURE] == nullptr) { success = false; }
 
-    key_press_texture_a[KEY_DOWN_TEXTURE] = load_texture("../res/img/down.bmp");
+    key_press_texture_a[KEY_DOWN_TEXTURE] = load_texture((resource_path + "img/down.bmp").c_str());
     if (key_press_texture_a[KEY_DOWN_TEXTURE] == nullptr) { success = false; }
 
-    key_press_texture_a[KEY_LEFT_TEXTURE] = load_texture("../res/img/left.bmp");
+    key_press_texture_a[KEY_LEFT_TEXTURE] = load_texture((resource_path + "img/left.bmp").c_str());
     if (key_press_texture_a[KEY_LEFT_TEXTURE] == nullptr) { success = false; }
 
-    key_press_texture_a[KEY_RIGHT_TEXTURE] = load_texture("../res/img/right.bmp");
+    key_press_texture_a[KEY_RIGHT_TEXTURE] = load_texture((resource_path + "img/right.bmp").c_str());
     if (key_press_texture_a[KEY_RIGHT_TEXTURE] == nullptr) { success = false; }
 
     return success;
