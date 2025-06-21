@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+
 #include <SDL2/SDL.h>
 
 #define TITLE "Window 1"
@@ -102,7 +103,7 @@ SDL_Texture* load_texture(const char* relative_path) {
 
 void set_image(SDL_Texture* texture, SDL_Rect size) {
     SDL_RenderClear(renderer_i);
-    SDL_RenderCopy(renderer_i, texture, nullptr, nullptr);
+    SDL_RenderCopy(renderer_i, texture, nullptr, &size);
     SDL_RenderPresent(renderer_i);
 }
 
@@ -113,44 +114,74 @@ int main() {
 
     load_media();
 
+    SDL_Texture* current_texture;
+
+    float divider = 2;
+
     SDL_Rect size_rect;
     size_rect.x = 0;
     size_rect.y = 0;
     size_rect.w = WIN_WIDTH / 2;
     size_rect.h = WIN_HEIGHT / 2;
 
-    set_image(key_press_texture_a[KEY_DEFAULT_TEXTURE], size_rect);
-    SDL_UpdateWindowSurface(window_i);
+    current_texture = key_press_texture_a[KEY_DEFAULT_TEXTURE];
+
+    set_image(current_texture, size_rect);
 
     SDL_Event e;
     bool quit = false;
 
     while (!quit) {
-        SDL_WaitEvent(&e);
-
-            if (e.type == SDL_QUIT) {
-                quit = true;
-            } else if (e.type == SDL_KEYDOWN) {
-                switch (e.key.keysym.sym) { // key symbols / identifiers
-                    case SDLK_UP:
-                        set_image(key_press_texture_a[KEY_UP_TEXTURE], size_rect);
-                        break;
-                    case SDLK_DOWN:
-                        set_image(key_press_texture_a[KEY_DOWN_TEXTURE], size_rect);
-                        break;
-                    case SDLK_LEFT:
-                        set_image(key_press_texture_a[KEY_LEFT_TEXTURE], size_rect);
-                        break;
-                    case SDLK_RIGHT:
-                        set_image(key_press_texture_a[KEY_RIGHT_TEXTURE], size_rect);
-                        break;
-                    default:
-                        set_image(key_press_texture_a[KEY_DEFAULT_TEXTURE], size_rect);
-                        break;
+            while (SDL_PollEvent(&e) != 0) {
+                if (e.type == SDL_QUIT) {
+                    quit = true;
+                } else if (e.type == SDL_KEYDOWN) {
+                    switch (e.key.keysym.sym) {
+                        case SDLK_UP:
+                            current_texture = key_press_texture_a[KEY_UP_TEXTURE];
+                            break;
+                        case SDLK_DOWN:
+                            current_texture = key_press_texture_a[KEY_DOWN_TEXTURE];
+                            break;
+                        case SDLK_LEFT:
+                            current_texture = key_press_texture_a[KEY_LEFT_TEXTURE];
+                            break;
+                        case SDLK_RIGHT:
+                            current_texture = key_press_texture_a[KEY_RIGHT_TEXTURE];
+                            break;
+                        case SDLK_COMMA:
+                            size_rect.w -= 20;
+                            size_rect.h -= 20;
+                            break;
+                        case SDLK_PERIOD:
+                            divider -= 0.2;
+                            size_rect.w += 20;
+                            size_rect.h += 20;
+                            break;
+                            break;
+                        case SDLK_w:
+                            size_rect.y -= 20;
+                            break;
+                        case SDLK_a:
+                            size_rect.x -= 20;
+                            break;
+                        case SDLK_s:
+                            size_rect.y += 20;
+                            break;
+                        case SDLK_d:
+                            size_rect.x += 20;
+                            break;
+                        default:
+                            current_texture = key_press_texture_a[KEY_DEFAULT_TEXTURE];
+                            break;
+                    }
                 }
             }
 
-            SDL_UpdateWindowSurface(window_i);
+            set_image(current_texture, size_rect);
+
+            SDL_Delay(16);
+
         }
 
         close();
