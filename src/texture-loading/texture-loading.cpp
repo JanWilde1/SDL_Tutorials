@@ -2,7 +2,8 @@
 #include <mach-o/dyld.h>
 #include <libgen.h>
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 
 #define TITLE "Window 1"
 
@@ -35,18 +36,16 @@ bool init() {
         // create the window
         window_i = SDL_CreateWindow(
             TITLE,
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
             WIN_WIDTH,
             WIN_HEIGHT,
-            SDL_WINDOW_SHOWN // visible
+            0
             );
 
         if (window_i == nullptr) {
             std::cout << "Window could not be created (Error: " << SDL_GetError() << ")" << std::endl;
             success_code = false;
         } else {
-            renderer_i = SDL_CreateRenderer(window_i, -1, SDL_RENDERER_ACCELERATED);
+            renderer_i = SDL_CreateRenderer(window_i, nullptr);
             if (renderer_i == nullptr) {
                 std::cout << "Renderer could not be created (Error: " << SDL_GetError() << ")" << std::endl;
                 success_code = false;
@@ -115,13 +114,13 @@ SDL_Texture* load_texture(const char* relative_path) {
         std::cout << "Could not create texture (Error: " << SDL_GetError() << ")" << std::endl;
     }
 
-    SDL_FreeSurface(loaded_surface);
+    SDL_DestroySurface(loaded_surface);
     return texture;
 }
 
-void set_image(SDL_Texture* texture, SDL_Rect size) {
+void set_image(SDL_Texture* texture, SDL_FRect size) {
     SDL_RenderClear(renderer_i);
-    SDL_RenderCopy(renderer_i, texture, nullptr, &size);
+    SDL_RenderTexture(renderer_i, texture, nullptr, &size);
     SDL_RenderPresent(renderer_i);
 }
 
@@ -136,7 +135,7 @@ int main() {
 
     float divider = 2;
 
-    SDL_Rect size_rect;
+    SDL_FRect size_rect;
     size_rect.x = 0;
     size_rect.y = 0;
     size_rect.w = WIN_WIDTH / 2;
@@ -151,10 +150,10 @@ int main() {
 
     while (!quit) {
             while (SDL_PollEvent(&e) != 0) {
-                if (e.type == SDL_QUIT) {
+                if (e.type == SDL_EVENT_QUIT) {
                     quit = true;
-                } else if (e.type == SDL_KEYDOWN) {
-                    switch (e.key.keysym.sym) {
+                } else if (e.type == SDL_EVENT_KEY_DOWN) {
+                    switch (e.key.key) {
                         case SDLK_UP:
                             current_texture = key_press_texture_a[KEY_UP_TEXTURE];
                             break;
@@ -177,16 +176,16 @@ int main() {
                             size_rect.h += 20;
                             break;
                             break;
-                        case SDLK_w:
+                        case SDLK_W:
                             size_rect.y -= 20;
                             break;
-                        case SDLK_a:
+                        case SDLK_A:
                             size_rect.x -= 20;
                             break;
-                        case SDLK_s:
+                        case SDLK_S:
                             size_rect.y += 20;
                             break;
-                        case SDLK_d:
+                        case SDLK_D:
                             size_rect.x += 20;
                             break;
                         default:
